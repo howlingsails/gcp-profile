@@ -1,0 +1,1207 @@
+#!/bin/bash
+
+# A set of automated comments for sourcing into .bash_profile accessed via getUsefulCommands
+# TIPS AND TRICKS
+# use ' ' forces no interpetation of the charactors inside. 
+EXPORT myNodeVersion="16.31.1"
+# A little magic
+shouldI=$(( ( RANDOM % 12 )  + 1 ))
+if [ "${shouldId}" = "7" ] 
+then
+    cat ~/.bash_always_automate
+fi
+alias .1='cd ../'                       # Go back 2 directory levels
+alias .2='cd ../../'                       # Go back 2 directory levels
+alias .3='cd ../../../'                     # Go back 3 directory levels
+alias .4='cd ../../../../'                  # Go back 4 directory levels
+alias .5='cd ../../../../../'               # Go back 5 directory levels
+alias .6='cd ../../../../../../'            # Go back 6 directory levels
+
+
+namespace="FHIR-POC"
+alias fhirpoc='export namespace=FHIR-POC'
+alias buildagent="export namespace=buildagent"
+alias kareo-test="export namespace=kareo-test"
+alias aid-box-proxy="echo "http://localhost:8080" && k port-forward service/aidbox 8080:80 -n $namespace &"
+
+alias k='kubectl -n "$namespace"'
+alias ke='kubectl exec -it -n "$namespace"'
+alias kg='kubectl get -n "$namespace"'
+alias ked='kubectl edit -n "$namespace"'
+alias kd='kubectl describe -n "$namespace"'
+alias kdel='kubectl delete -n "$namespace"'
+alias kl='kubectl logs -n "$namespace"'
+alias kc='kubectl create -n "$namespace"'
+
+alias sshkey='cat ~/.ssh/id_rsa.pub'
+alias commands=`cat ~/.bash_commands | grep "alias\|function"| sed "s/=/ /" | awk '{print $2}' | sed  "s/=\"cat//" | sed "s/='clear;//" | sed "s/='//" | sed "s/=\"//" | sed "s/;//" | sed "s/()//" | sort | xargs -s 140`
+alias fixclip="killall pboard"
+alias epoch="date +%s%N | cut -b1-13"
+
+alias kafkaManagerDev='docker run -it  -p 9001:9000 -e ZK_HOSTS="sna-dvx-zk-01.kareo.ent:2181,sna-dvx-zk-02.kareo.ent:2181,sna-dvx-zk-03.kareo.ent:2181" hlebalbau/kafka-manager:stable -Dpidfile.path=/dev/null'
+alias kafkaManagerTest='docker run -it -p 9002:9000 -e ZK_HOSTS="sna-tsx-zk-01.kareo.ent:2181,sna-tsx-zk-02.kareo.ent:2181,sna-tsx-zk-03.kareo.ent:2181"  hlebalbau/kafka-manager:stable  -Dpidfile.path=/dev/null'
+alias kakfaManagerStage='docker run -it -p 9003:9000 -e ZK_HOSTS="sna-sgx-zk-04.kareoprod.ent:2181,sna-sgx-zk-05.kareoprod.ent:2181,sna-sgx-zk-06.kareoprod.ent:2181"  hlebalbau/kafka-manager:stable  -Dpidfile.path=/dev/null'
+alias kafkaManagerProd='docker run -it -p 9003:9000 -e ZK_HOSTS="las-pdx-zk-04.kareoprod.ent:2181,las-pdx-zk-05.kareoprod.ent:2181,las-pdx-zk-06.kareoprod.ent:2181,las-pdx-zk-07.kareoprod.ent:2181,las-pdx-zk-08.kareoprod.ent:2181"      hlebalbau/kafka-manager:stable      -Dpidfile.path=/dev/null'
+
+# TODO Why can't I get this to work. 
+alias kafdropDev2='docker run -it -p 9011:9000 -e KAFKA_BROKERCONNECT="sna-dvx-kafka-01.kareo.ent:9200,sna-dvx-kafka-02.kareo.ent:9200,sna-dvx-kafka-03.kareo.ent:9200"  obsidiandynamics/kafdrop'
+
+
+
+# A little magic
+shouldI=$(( ( RANDOM % 2 )  + 1 ))
+if [ "${shouldId}" = "1" ] 
+then
+    echo -e ""${BCyan}"\"cra asks... what is the next app? "
+    sleep 5
+fi
+
+# Create React App with React-Boilerplate-CRA-Typescript Template 
+function cra() {
+
+    if [[ -n $1 ]]
+    then
+        applicationName=$1
+    else
+        echo ""
+        echo -n "What do you want me to call this application?"
+        read applicationName
+    fi
+    currentdir=$(echo $PWD)
+    echo -e "The Application ${applicationName} we be created in ${currentdir}/${applicationName}\n\nPress Ctrl-C to Stop. Type C and Enter to continue..."
+    read c
+    if [ "$c" = "c" ]
+    then
+        npx create-react-app ${applicationName} --template cra-template-rb --typescript  
+        #npx create-react-app kevin --template cra-template-rb --typescript  
+        newDir="${currentdir}/${applicationName}}"
+        echo -e "Switch back to ${newDir}"
+        cd $newDir
+        yarn upgrade
+        echo -e "\n\nMake sure to run \nyarn cleanAndSetup"
+    fi
+}
+
+function extractMachinesFromEHRDeploy() {
+    workDirectory="/Users/bill.nortman/dev3/ehr-deploy-scripts"
+    for deployment in /Users/bill.nortman/dev3/ehr-deploy-scripts/deploy*.rb
+    do 
+        filename=$(echo ${deployment} | sed 's:.*/.*/::g')
+        hostconfig=$(cat ${deployment} | grep HOST_NODE_TAG)
+        hostconfig=$(echo ${hostconfig} | sed 's/{HOST_NODE_TAG}/#/g')
+        hostconfig=$(echo ${hostconfig} | sed 's/\"//g')
+        hostconfig=$(echo ${hostconfig} | sed 's/ //g')
+        hostconfig=$(echo ${hostconfig} | sed 's/,/\n/g')
+        echo -e "\n\n============================================================\n${filename}"
+        artifactConfig=$(cat ${deployment} | grep Artifact)
+        artifactConfig=$(echo ${artifactConfig} | sed 's/.*new//g')
+        artifactConfig=$(echo ${artifactConfig} | sed 's/\"//g')
+        artifactConfig=$(echo ${artifactConfig} | sed 's/.*, //g')
+        if [[ -n "${artifactConfig}" ]]; then
+            echo -e "Artifact:${artifactConfig}"
+        else
+            artifactConfig=$(cat ${deployment} | grep "artifact_name =")
+            artifactConfig=$(echo ${artifactConfig} | sed 's/.*= //g')
+            artifactConfig=$(echo ${artifactConfig} | sed 's/\"//g')
+           if [[ -n "${artifactConfig}" ]]; then
+                echo -e "Artifact:${artifactConfig}"
+           else
+            artifactConfig=$(cat ${deployment} | grep "update_git_repo")
+            artifactConfig=$(echo ${artifactConfig} | sed 's/\"//g')
+            artifactConfig=$(echo ${artifactConfig} | sed 's/.*update_git_repo//g')
+            echo -e "Artifact:${artifactConfig}"
+           fi
+           
+        fi
+        nodeConfig=$(cat ${deployment} | grep 01)
+        nodeConfig=$(echo ${nodeConfig} | sed 's/\"//g')
+        nodeConfig=$(echo ${nodeConfig} | sed 's/\],/\]\n/g')
+        echo -e "Nodes:\n${nodeConfig}"
+        echo -e "Hosts:\n${hostconfig}"
+        
+        
+    done
+}
+
+# Make The Title for GitBash Terminal
+function tn () {
+    echo -ne "\e]0;${1}\a"
+}
+
+
+function tnd () {
+    dir=`echo "${PWD##*/}"`
+    echo -ne "\e]0;${1}\a"
+}
+
+function aa () {
+    cat ~/.bash_always_automatedir
+}
+
+function hos () {
+    cat ~/.bash_hos
+}
+
+function tt () {
+    cat ~/.bash_tebra
+}
+
+function listFiles () {
+    ll | awk '{ print $10}'
+}
+
+
+
+
+
+# Copy the current branch into clipboard
+function branch () {
+    branchName=`git branch | grep \* | awk '{print $2}'`
+    # TODO Removed to validation it doesn't add the newline branchName=`echo "${branchName%%*([$'\t\r\n '])}"`
+    echo "${branchName}" | pbcopy
+    echo "Branch ${branchName} copied into clipboard"
+    
+}
+
+
+function epochList () {
+
+    rightNow=`date +%s | sed 's/N//g'`
+    let x=rightnow
+    let y=x + 86400000
+    tomorrow=`expr ${x} + 86400000`
+    echo -e "rightNow=${rightNow}"
+    echo -e "MS in Day=86400000"
+
+}
+
+function friends() {
+    echo -e "⥈ 𝓢∅⊺⨁ ⥈"
+    echo -e "⥄ 𝓜⋀ℛ⊏⊙ 𝛧 ⥂"
+    echo -e "≌ 𝓜𝔧𝜥𝜀𝜸 ≌"
+    echo -e "⤺ 𝙹𝕒𝕀𝕽𝛩 ⤻"
+    echo -e "\n☀︎ ☼ ☽ ☾ ☁︎ ☂︎ ☔︎ ☃︎ ★ ☆"
+    echo -e "\n☇ ☈ ♠︎ ♣︎ ♥︎ ♦︎ ♘ ♗ ♙"
+    echo -e "\n⚓︎ ♨︎ ⚚ ⚒︎ ⚛︎ ☘︎\n\n🁏 🂤🂢 🃄🂲 ⚃⚁"
+
+}
+
+
+alias sssh='ssh -o PubkeyAuthentication=no kp-bill.nortman@"$@"'
+
+
+#remote=$(hg summary --remote | grep remote | sed "s/.*: //g" | sed "s/(synced)//g")
+#alias nrc='hg summary --remote | grep remote | sed "s/.*: //g" | sed "s/\(synced\)//g"'
+#outgoing=$(hg outgoing | grep changeset | wc -l | tr -d ' ')
+alias noc=$(hg outgoing | grep changeset | wc -l | tr -d ' ')
+
+
+alias tomcat='cd /Users/bill.nortman/Library/Caches/JetBrains/IntelliJIdea2020.2/tomcat'
+
+    #remote=`hg summary --remote | grep remote | sed "s/.*: //g" | sed "s/(synced)//g"`
+remote="NRC" #No Check TODO: make a cached on later check, delay 30 secondon first entry but then cached for 1 minute? Remote NRC for when not checked
+#outgoing=`hg outgoing | grep changeset | wc -l | tr -d ' '`
+outgoing="NOC" #See Above TODO Cache 1 minute. NOC for not checked
+
+
+function sshfix () {
+    #TOFIX: remote: repository access denied.
+    eval `ssh-agent`
+    ssh-add -D
+    ssh-add ~/.ssh/id_rsa
+}
+
+function pop() {
+    pwd|pbcopy;
+    echo "Working Directory Copied to Clipboard";
+}
+
+function backup() {
+    # V1
+    #tar cvzf "/Users/bill.nortman/dev2/localBashBackup/bash_backup-$(date +"%FT").tar.gz" ~/.bash*;
+    # V2
+    # for f in /Users/bill.nortman/.bash*; do  if [ -f $f ] ; then cp -f "$f" /Users/bill.nortman/dev2/_automation/bash-mac; fi; done
+    # V3 Dependency Inversion This is now the root we copy down with "src" command in .bash_profile
+    currentdir=`pwd`;
+    cd ~/dev2/_automation/bash-mac/;
+    # Add for branch for new machine
+    # git branch $HOSTNAME
+    git checkout $HOSTNAME
+    git add .
+    git commit -m "automated backup"
+    git push
+    cd ${currentdir}
+}
+
+alias htop="sudo htop"
+
+function devpass() {
+    # brew install lastpass-cli
+    lpass login bnortman@yahoo.com
+    echo "Logged In"; lpass show _tcserver.kareo.com | grep Username | awk '{print $2}'
+    echo ""; lpass show _tcserver.kareo.com | grep Password | awk '{print $2}' | pbcopy
+    lpass logout -f
+    echo "Password in ClipBoard"
+}
+
+function prodpass() {
+    # brew install lastpass-cli 
+    # _kp-domain is the name of my stored password in last pass
+    lpass login bnortman@yahoo.com
+    # Show username to terminal
+    echo "Logged In"; lpass show _kp-domain | grep Username | awk '{print $2}'
+    # Put the password into the mac clipboard
+    echo ""; lpass show _kp-domain| grep Password | awk '{print $2}' | pbcopy
+    lpass logout -f
+    echo "Password in ClipBoard"
+}
+
+
+function resetKPPassword() {
+    lpass login bnortman@yahoo.com
+    read -p "Enter New Password: " tempPassword
+    newpass=`lpass generate --sync=now --username kp-bill.nortman _kp-domain 14`
+    echo $tempPassword | pbcopy
+    echo "Temp:${tempPassword} New:${newpass}"
+    echo "Temp is in clipboard"
+    
+    host='ct-eng-web01-devint.kareoprod.ent' 
+
+    ssh -o PubkeyAuthentication=no ${produser}@${host} 
+
+    lpass logout -f
+}
+
+
+function webDevInfo() {
+    
+    if [ -f ".nvmrc" ]
+    then
+       nvm use
+    fi
+
+    if [ -f "yarn.lock" ]
+    then
+        echo -e "${BWhite}Using ${BCyan}yarn${White}"
+    
+    elif [ -f "package-lock.json" ]
+    then
+            echo -e "${BWhite}Using ${BCyan}npm${White}"
+
+    else
+        echo -e "${BYellow}No Package Manager: ${BWhite}Please ${BCyan}\"yarn\" ${BWhite} or ${BCyan}\"npm install\" ${White}"
+    fi
+
+
+    nodeVersion=$(node -v)
+    nvmVersion=$(nvm -v)
+    npmVersion=$(npm -v)
+    yarnVersion=$(yarn -v)
+    npxVersion=$(npx -v)
+    
+    echo -e "${BGreen}node:${BWhite}${nodeVersion} ${White}| ${BGreen}yarn:${BWhite}${yarnVersion} ${White}| ${BGreen}npx:${BWhite}${npxVersion} ${White}| ${BGreen}nvm:${BWhite}${npxVersion}${White}"
+    echo -e "\nComands available in ${BYellow}package.json: ${White}"
+    jq .scripts package.json
+
+}
+
+
+
+function hints() {
+    echo ""
+    echo -e "${BYellow}Hints ${White}   sudo lsof -i tcp:50111 -- network port usage"
+    echo "  tar -zcvf archive-name.tar.gz directory-name"
+    echo "  tar -xvzf archive-name.tar.gz"
+    echo "  Command+Shift+G goto folder"
+    echo "  https://github.com/howlingsails/ubuntu-bash-profile/archive/master.zip"
+    echo "  ehr-dev-tools -domain -service -ui -aux -processor -api"
+    echo "  defaults write com.apple.finder AppleShowAllFiles -bool true"
+    echo "  defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseHorizontalScroll -bool NO"
+    echo "  defaults write com.microsoft.VSCode.helper CGFontRenderingFontSmoothingDisabled -bool NO"
+    echo "  scp bill.nortman@tsx-svcs01:/home/kareoprod.ent/bill.nortman/<FILE SEARCH>* ."
+    echo "  cat fork-pool-thread-dump | grep -E 'BLOCKED|kareo'| grep -v 'servercore' | grep -E -A1 'BLOCKED' | grep -v 'BLOCKED' | grep -v '-' | sort | uniq -c | sort"
+    echo "  cat fork-pool-thread-dump | sort | uniq -c | sort"
+    echo -e "  scp /Users/bill.nortman/tmp/<FILE SEARCH>* bill.nortman@tsx-svcs01:/home/kareoprod.ent/bill.nortman/ ${Blue}--ADD working example${White}"
+    echo -e "  ssh -o PubkeyAuthentication=no bill.nortman@devintx-web01.kareo.ent   ${Blue}-- Change KareoProd Password ${White}"
+    echo "  mvn dependency:analyze -DignoreNonCompile"
+    echo "  nvm use && yarn "
+    echo '  git log --pretty=format:"%ad - %an: %s" --after="2020-09-08" --until="2029-10-05"'
+    echo ""
+    echo ""
+}
+
+# Show what automated scripted installs are available
+function installs() {
+    source ~/.bash_installs
+    echo ""
+    installList
+    echo ""
+}
+
+# Makes new Dir and jumps inside
+function mcd () {
+    echo "Make and Create Directory"
+    mkdir -p ${1} && cd ${1};
+}
+
+
+# Search Dependency Tree for Kareo librarys
+function kdt () {
+    echo "Run first: mvn install"
+    echo "Running: dependency:tree | grep kareo"
+    result=`mvn dependency:tree | grep kareo | grep "+" | sed "s/.*com.kareo./ /g" | sed "s/:/ /g" | sed "s/\./\s/g" | awk '{print $2}'`
+    echo "${result}";
+}
+
+#function hgdiff () {
+#    changeset=$1
+#    #Example :d343674bda51
+#    echo "Finding ${changeset}."
+#    revision=`hg log --branch default | grep ${changeset} | grep parent | awk '{print $2}'`
+#    echo "Revision:${revision}"
+#    hg log --branch default | grep d343674bda51 | grep parent | awk '{ print $2 }' | sed 's/:.*//'
+#}
+
+function sign () {
+    echo "⚓︎ ℭ𝔞𝔭⥠⦿𝔟𝔦𝔩𝔩 ⚓︎" | pbcopy
+    echo "⚓︎ ℭ𝔞𝔭⥠⦿𝔟𝔦𝔩𝔩 ⚓︎ is in the clipboard"
+}
+
+function listFiles () {
+    ll | awk '{ print $10}'
+}
+
+# Make it easy to kubectl
+alias k=kubectl
+
+
+# Use mdhlruntime files to generate POM dependencies
+function mdhlReleaseSetToPom () {
+    echo "This assumes you are in the unzip release package under the mdhlruntime/mdht folder/directory"
+    echo "release packages come from: https://github.com/mdht/mdht-models/releases "
+    echo ""
+    echo "Press The Any Key to Continue. Ctrl-C to stop"
+    echo ""
+    read tmp
+    mdhlLibraryFiles=`ll *.jar | awk '{ print $10}'`
+    echo ""
+    echo "$mdhlLibraryFiles"
+
+    echo ""
+    echo "Mapped into dependency config"
+    echo ""
+    echo "$mdhlLibraryFiles" | while read currentLibrary; do
+        currentVersion=`echo $currentLibrary  | sed "s/-/ /" | sed "s/.jar//" | awk '{print $2}'`
+        currentLibName=`echo $currentLibrary  | sed "s/-/ /" | sed "s/.jar//" | awk '{print $1}'`
+        currentGroup=`echo $currentLibrary | sed "s/-/ /" | sed "s/mdht\..*/mdht/" | sed "s/cbcc\..*/cbcc/" | sed "s/security\..*/security/" | awk '{print $1}'`
+        echo "<dependency>"
+        echo "    <groupId>$currentGroup</groupId>"
+        echo "    <artifactId>$currentLibName</artifactId>"
+        echo "    <version>$currentVersion</version>"
+        echo "</dependency>"
+    done
+
+}
+
+# Clean Branches
+function branchCleaner () 
+{
+    echo "git remote prune origin"
+    git remote prune origin
+    echo "git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}' | xargs git branch -D"
+    git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}' | xargs git branch -D
+}
+
+
+
+# Get all Kareo Git Repos
+function getKareoGit ()
+{
+    source=~/.bsh⚓︎ 
+    if [[ -z "${GIT_USER}" ]]; then
+        echo "What is your GITHub username?"
+        read GIT_USER
+    fi
+    if  [[ -z "${GITHUB_TOKEN}" ]]; then
+        echo "What is your github token? https://github.com/settings/tokens"
+        read GITHUB_TOKEN
+    fi
+    echo "Are you in the directory you want all the files to go!!!!! <PRESS CTRL-C> to exit: ENTER to Continue"
+    read nothing
+    for PAGE in {1..100};
+    do
+        #echo -e "\nRunning Curl for Page ${PAGE}";
+        url="https://api.github.com/orgs/kareo-engineering/repos?size=10&page=${PAGE}";
+        #echo "URL:${url}";
+        if curl -s -u ${GIT_USER}:${GITHUB_TOKEN} -o tmp.txt ${url}; then
+            mv -iv -f tmp.txt tmp2.txt >> /dev/null 2>&1;
+        else
+            printf 'Curl failed with error code "%d" (check the manual)\n' "$?" 1>&2;
+            exit 1;
+        fi;
+        result=`sed 's/,/\'$'\n/g' tmp2.txt | grep "\"url\"" | grep "kareo-engineering/" | sed 's/.*\"h/\"h/g' | sed s/\"//g`;
+        
+        # Check if we are done
+        if [ -z "$result" ]; then
+            break;
+        fi;
+
+        #echo -e "${result}";
+
+        
+        for repo in $result
+        do
+            repoDir=`echo "${repo}" | sed 's/.*kareo.*\///' `
+            if [[ -d "${repoDir}" ]]; then
+                echo "${repoDir} already cloned.";
+                continue;
+            fi;
+
+            if curl -s -u ${GIT_USER}:${GITHUB_TOKEN} -o tmp3.txt ${repo}; then
+                mv -iv -f tmp3.txt tmp4.txt >> /dev/null 2>&1;
+            else
+                printf 'Curl failed with error code "%d" (check the manual)\n' "$?" 1>&2;
+                exit 1;
+            fi;
+            sshurl=`sed 's/,/\'$'\n/g' tmp4.txt | grep "\"ssh_url\"" | grep "kareo-engineering/" | sed 's/.*\"ssh_url\": //g' | sed s/\"//g`;
+            for sshdir in $sshurl
+            do
+                    #echo "git clone ${sshdir}"
+                    git clone $sshdir
+            done
+        done
+
+        rm -f tmp.txt;
+        rm -f tmp2.txt;
+    done
+}
+
+function cdaValidate () {
+    #https://stackoverflow.com/questions/31994266/validate-a-schematron-schema-with-abstract-rules-fails-with-xmllint
+    #xmllint --schema /Users/bill.nortman/Downloads/HITSP_C32_v_2_5/cdar2c32/infrastructure/cda/SDTC_Extension.xsd --schematron /Users/bill.nortman/Downloads/HITSP_C32_v_2_5/HITSP_C32.sch /Users/bill.nortman/Downloads/HITSP_C32_v_2_5/example/CCD_HITSP_C32v2.5_Minimal_WithEntries_Valid.xml
+    #TODO: Never got this working
+    xmllint --schema /Users/bill.nortman/Downloads/HITSP_C32_v_2_5/cdar2c32/infrastructure/cda/SDTC_Extension.xsd /Users/bill.nortman/Downloads/HITSP_C32_v_2_5/example/CCD_HITSP_C32v2.5_Minimal_WithEntries_Valid.xml
+}
+
+function showContainers () {
+        ls -l /srv/www/tomcat | sed 's/.*Container/Container/g' | sed 's/.*\.//g' | sed 's/\.//g'
+}
+
+function goContainers () {
+        cd /srv/www/tomcat
+}
+
+function setNifi () {
+    docker pull apache/nifi:latest
+    docker run --name nifi -p 9090:9090 -d -e NIFI_WEB_HTTP_PORT='9090'  apache/nifi:latest 
+    echo "http://localhost:9090/nifi/"
+}
+
+function setupNifiKeyStore () {
+        lpass login bnortman@yahoo.com
+        export nifiKeypass=`lpass generate nifi-local-key 45`
+        export nifiStorepass=`lpass generate nifi-local-store 45`
+        lpass logout
+        # PER https://docs.oracle.com/cd/E19798-01/821-1751/ghlgv/index.html
+        keytool -genkey -alias keyAlias-keyalg RSA -keypass ${nifiKeypass} -storepass ${nifiStorepass}  keystore keystore.jks
+
+}
+
+
+function setupNifiSecure () {
+
+    # PER https://hub.docker.com/r/apache/nifi/dockerfile
+    docker run --name nifi \
+        -v /User/bill/dev2/nifi/certs:/opt/certs \
+        -p 8443:8443 \
+        -e AUTH=ldap \
+        -e KEYSTORE_PATH=/opt/certs/keystore.jks \
+        -e KEYSTORE_TYPE=JKS \
+        -e KEYSTORE_PASSWORD=${nifiKeypass} \
+        -e TRUSTSTORE_PATH=/opt/certs/truststore.jks \
+        -e TRUSTSTORE_PASSWORD=${nifiStorepass} \
+        -e TRUSTSTORE_TYPE=JKS \
+        -e INITIAL_ADMIN_IDENTITY='cn=admin,dc=example,dc=org' \
+        -e LDAP_AUTHENTICATION_STRATEGY='SIMPLE' \
+        -e LDAP_MANAGER_DN='cn=admin,dc=example,dc=org' \
+        -e LDAP_MANAGER_PASSWORD='password' \
+        -e LDAP_USER_SEARCH_BASE='dc=example,dc=org' \
+        -e LDAP_USER_SEARCH_FILTER='cn={0}' \
+        -e LDAP_IDENTITY_STRATEGY='USE_DN' \
+        -e LDAP_URL='ldap://ldap:389' \
+        -d \
+        apache/nifi:latest
+}
+
+function setupMySQLUMLS () {
+    docker pull mysql/mysql-server:latest
+    docker run --name=mysql1 -d mysql/mysql-server:latest
+    echo "mysql generated password"
+    docker logs mysql1 2>&1 | grep GENERATED
+
+    # TODO: Add Password for mysql
+    MYSQL_HOME="<path to MYSQL_HOME>"
+    user="<username>"
+    password="<password>"
+    db_name=<"db_name>"
+}
+
+
+function glowRootTest () {
+    echo -n "ServiceName To Connect:"
+    read servicename
+    servicehosts=`curl http://tsx-aux.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "hostName" | sed 's/.*: "//g' | sed 's/",//g'`
+    containers=`curl http://tsx-aux.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "Container" | sed 's/.*Container//g' | sed 's/"//g'`
+
+        for host in $servicehosts
+        do
+            echo -e "serviceHost ${host} "
+            for container in $containers
+            do
+                postport=`getContainerIDTwoDiget ${container}`
+                glassport="540${postport}"
+                open "http://${host}:${glassport}" &
+                break;
+            done
+        done
+
+}
+
+function glowRootDEV () {
+    echo -n "ServiceName To Connect:"
+    read servicename
+    servicehosts=`curl http://devintx-aux01.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "hostName" | sed 's/.*: "//g' | sed 's/",//g'`
+    containers=`curl http://devintx-aux01.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "Container" | sed 's/.*Container//g' | sed 's/"//g'`
+
+        for host in $servicehosts
+        do
+            echo -e "serviceHost ${host} "
+            for container in $containers
+            do
+                postport=`getContainerIDTwoDiget ${container}`
+                glassport="540${postport}"
+                open "http://${host}:${glassport}" &
+                break;
+            done
+        done
+
+}
+
+function connectProdVisualVMPlatformPats {
+    let servicename="ehr-platform-pats"
+    servicehosts=`echo -e "las-pdx-pats-04.kareoprod.ent\nlas-pdx-pats-03.kareoprod.ent\nlas-pdx-pats-02.kareoprod.ent\nlas-pdx-pats-07.kareoprod.ent\n"`
+    let port="53002"
+    for host in $servicehosts
+    do
+        echo "./Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx  ${host}:${port}"
+        /Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx   $host:$port &
+        sleep 1            
+    done
+}
+
+function connectProdVisualVMCommonPats {
+    let servicename="ehr-common-pats"
+    servicehosts=`echo -e "las-pdx-pats-04.kareoprod.ent\nlas-pdx-pats-03.kareoprod.ent\nlas-pdx-pats-02.kareoprod.ent\nlas-pdx-pats-07.kareoprod.ent\n"`
+    let port="53001"
+    for host in $servicehosts
+    do
+        echo "./Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx  ${host}:${port}"
+        /Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx   $host:$port &
+        sleep 1     
+    done
+}
+
+
+function connectTestVisualVM () {
+    echo -n "ServiceName To Connect:"
+    read servicename
+    servicehosts=`curl http://tsx-aux.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "hostName" | sed 's/.*: "//g' | sed 's/",//g'`
+    containers=`curl http://tsx-aux.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "Container" | sed 's/.*Container//g' | sed 's/"//g'`
+
+        for host in $servicehosts
+        do
+            for container in $containers
+            do
+                postport=`getContainerIDTwoDiget ${container}`
+                port="530${postport}"
+
+                echo "./Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx  ${host}:${port}"
+                /Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx   $host:$port &
+                break
+            done
+        done
+
+}
+
+
+function connectDevVisualVM () {
+    echo -n "ServiceName To Connect:"
+    read servicename
+    servicehosts=`curl http://devintx-aux01.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "hostName" | sed 's/.*: "//g' | sed 's/",//g'`
+    containers=`curl http://devintx-aux01.kareo.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "Container" | sed 's/.*Container//g' | sed 's/"//g'`
+
+        for host in $servicehosts
+        do
+            for container in $containers
+            do
+                postport=`getContainerIDTwoDiget ${container}`
+                port="530${postport}"
+
+                echo "./Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx  ${host}:${port}"
+                /Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home  --openjmx   $host:$port &
+                break # so we don't do multiple of the same port for multiples hosts
+            done
+        done
+
+}
+
+function connectProdVisualVM () {
+    echo -n "ServiceName To Connect:"
+    read servicename
+    servicehosts=`curl http://las-pdx-aux.kareoprod.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "hostName" | sed 's/.*: "//g' | sed 's/",//g'`
+    containers=`curl http://las-pdx-aux.kareoprod.ent:42011/service-registry-auxiliary/api/ServiceHost/ | jq | grep -a2 "${servicename}" | grep "Container" | sed 's/.*Container//g' | sed 's/"//g'`
+
+        for host in $servicehosts
+        do
+            for container in $containers
+            do
+                postport=`getContainerIDTwoDiget ${container}`
+                port="530${postport}"
+
+                echo "./Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx  ${host}:${port}"
+                /Applications/VisualVM.app/Contents/MacOS/visualvm --jdkhome /Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home --openjmx   $host:$port &
+                sleep 1
+                break # so we don't do multiple of the same port for multiples hosts
+            done
+        done
+
+}
+
+
+
+function getContainerIDTwoDiget() {
+    container=$1
+    case $container in
+        A)
+        port="01"
+        ;;
+        B)
+        port="02"
+        ;;
+        C)
+        port="03"
+        ;;
+        D)
+        port="04"
+        ;;
+        E)
+        port="05"
+        ;;
+        F)
+        port="06"
+        ;;
+        G)
+        port="07"
+        ;;
+        H)
+        port="08"
+        ;;
+        I)
+        port="09"
+        ;;
+        J)
+        port="10"
+        ;;
+        K)
+        port="11"
+        ;;
+        L)
+        port="12"
+        ;;
+        M)
+        port="13"
+        ;;
+        N)
+        port="14"
+        ;;
+        O)
+        port="15"
+        ;;
+        P)
+        port="16"
+        ;;
+    esac
+    echo $port
+
+}
+
+
+function dependencyUpdateChk () {
+    echo ""
+    echo 'Running....'
+    echo 'mvn versions:display-dependency-updates | grep  -a1 " com.kareo\|commonservice-client\|org.eclipse\|org.openhealthtools" | grep -v "artifact\|guava\|SNAPSHOT\|mockrunner-all\|jetty\|jacabi\|easymock"'
+    echo ''
+    echo '                                                        ... This can take a while '
+    mvn versions:display-dependency-updates | grep  -a1 " com.kareo\|commonservice-client\|org.eclipse\|org.openhealthtools" | grep -v "artifact\|guava\|SNAPSHOT\|mockrunner-all\|jetty\|jacabi\|easymock"
+}
+
+# Check for versions of new libraries to upgrade
+function libVersionChck () {
+    mvn versions:display-dependency-updates -Dverbose=true -Dmaven.version.rules.="./rules.xml" 
+}
+
+# Connect To Any System with BashProfile
+function anySystem() {
+    if [ -n $1 ] 
+    then
+        host=$1
+    else 
+        echo "Connect to any system using prodpass lastpass integration... You can also add host to the commandline for this command."    
+        echo ""
+        echo -n "Paste Hostname/IP Address:"
+        read host
+    fi
+    prodpass
+    echo ""
+    echo -e "${BWhite}----------------------------------------------------------------------------------------------------"
+    echo -e "${BGreen}Install Bash Profile By"
+    echo -e "${BWhite}----------------------------------------------------------------------------------------------------"
+    # This is my local mac username and hostname available to lower tier
+    echo -e "${BCyan}scp bill.nortman@kmac-32slvdq.kareo.ent:/Users/bill.nortman/dev2/_automation/bash-ubuntu/.bash* ~/"
+    echo -e "${BYellow}scp /Users/bill.nortman/dev2/_automation/bash-ubuntu/.bash* kp-bill.nortman@${host}:~/"
+    echo -e "${BCyan}source ~/.bash_profile"
+    echo -e "${BWhite}----------------------------------------------------------------------------------------------------"
+    echo -e "${BYellow}"
+    echo -e "Connecting to ssh -o PubkeyAuthentication=no ${produser}@${host}"
+    echo -e "-o PubkeyAuthentication=no keep it from trying to use my public keys by default"
+    echo -e "${BGreen}"
+    scp /Users/bill.nortman/dev2/_automation/bash-ubuntu/.bash* ${produser}@${host}:~/
+    ssh -o PubkeyAuthentication=no ${produser}@${host}  
+      
+}
+
+function getUbuntuProfile() {
+    if [ -n $1 ] 
+    then
+        host=$1
+    else 
+        echo "Connect to any system using prodpass lastpass integration... You can also add host to the commandline for this command."    
+        echo ""
+        echo -n "Paste Hostname/IP Address:"
+        read host
+    fi
+    prodpass
+    echo ""
+    echo -e "${BWhite}----------------------------------------------------------------------------------------------------"
+    echo -e "${BGreen}Retrieving Bash Profile By"
+    echo -e "${BWhite}----------------------------------------------------------------------------------------------------"
+    # This is my local mac username and hostname available to lower tier
+    echo -e "${BCyan}scp bill.nortman@kmac-32slvdq.kareo.ent:/Users/bill.nortman/dev2/_automation/bash-ubuntu/.bash* ~/"
+    echo -e "${BYellow}scp ${produser}@${host}:~/.bash* $/Users/bill.nortman/dev2/_automation/bash-ubuntu/"
+    echo -e "${BWhite}----------------------------------------------------------------------------------------------------"
+    scp ${produser}@${host}:~/.bash* /Users/bill.nortman/dev2/_automation/bash-ubuntu
+
+}
+
+# Lo
+
+g into Performance Test Jump Box
+function testJumpBox() {
+
+    # scp -r /Users/bill.nortman/dev3/appointment-service/ kp-bill.nortman@sna-pdx-rich-01.kareoprod.ent:~/dev3/appointment-service
+
+    anySystem sna-pdx-rich-01.kareoprod.ent
+}
+
+function testJumpBoxFull() {
+    prodpass
+    currentdir=`pwd`
+    
+    
+    cd /Users/bill.nortman/dev3/appointment-service/
+    mvn clean
+    host="sna-pdx-rich-01.kareoprod.ent"
+    tput bel
+    tput bel
+    scp -r /Users/bill.nortman/dev3/appointment-service/ ${produser}@${host}:~/dev3/appointment-service
+    
+    
+    cd /Users/bill.nortman/dev3/patient-service/
+    mvn clean
+    tput bel
+    tput bel
+    scp -r /Users/bill.nortman/dev3/patient-service/ ${produser}@${host}:~/dev3/patient-service
+    tput bel
+    tput bel
+    scp /Users/bill.nortman/dev2/_automation/bash-ubuntu/.bash* ${produser}@${host}:~/
+    tput bel
+    scp /Users/bill.nortman/.m2/settings.xml  ${produser}@${host}:~/.m2/
+
+    cd ${pwd}
+    tput bel
+    tput bel
+    ssh -o PubkeyAuthentication=no ${produser}@${host}  
+}
+function legacy () {
+    cd ~/dev3/ehr-dev-tools
+    source setenv.sh ~/.bash_profile
+}
+
+function sshPhysDev () {
+    anySystem sna-dvx-phys-01.kareoprod.ent
+}
+function sshPatsDev () {
+    anySystem sna-dvx-pats-01.kareoprod.ent
+}
+function sshfpatsDev () {
+    anySystem sna-dvx-fpats-01.kareoprod.ent
+}
+
+function sshBellagioADev () {
+    anySystem ct-eng-web01-devint.kareoprod.ent
+}
+
+function sshBellagio1Dev () {
+
+    anySystem sna-sgx-bweb-01.kareoprod.ent
+}
+
+function sshBellagio2Dev () {
+    anySystem sna-sgx-bweb-02.kareoprod.ent
+}
+
+function reloadPhys() {
+    stopphys
+    cd ~/dev3/ehr-common-services
+    mvn install -Dmaven.test.skip=true
+    killphys
+    deployphys
+    rm /Users/bill.nortman/dev3/ehr-dev-tools/services/tomcat/phys/logs/*
+    touch /Users/bill.nortman/dev3/ehr-dev-tools/services/tomcat/phys/logs/catalina.out
+    chmod 660 /Users/bill.nortman/dev3/ehr-dev-tools/services/tomcat/phys/logs/catalina.out
+    startphys
+
+}
+function getGifs() {
+    usefulCommandList=`cat ~/.bash_gif | grep "alias\|function"| sed "s/=/ /" | awk '{print $2}' | sed  "s/=\"cat//" | sed "s/='clear;//" | sed "s/='//" | sed "s/=\"//" | sed "s/;//" | sed "s/()//"  | sort`
+    cnt=0
+    line=""
+    for  command in $usefulCommandList
+    do
+        command=`printf '%-18s' $command`
+        line="${line}${command}\t"
+        let cnt=cnt+1
+        if [ $cnt -gt 5 ]
+        then
+            echo -e "${line}"
+            line=""
+            let cnt=0
+        fi
+    done
+
+}
+
+
+function getUsefulCommands() {
+    usefulCommandList=`cat ~/.bash_commands | grep "alias\|function" | grep -v "bash_" | grep -v "\-alias" | sed "s/-genkey//" | sed "s/=/ /" | awk '{print $2}' | sed  "s/=\"cat//" | sed "s/='clear;//" | sed "s/='//" | sed "s/=\"//" | sed "s/;//" | sed "s/()//"  | sort -f`
+    cnt=0
+    line=""
+    # SORT IN COLUMNS 
+    # Get total count
+    let numberOfCommands=0
+    for  command in $usefulCommandList
+    do
+        #echo "${command}"
+        let numberOfCommands=numberOfCommands+1
+    done
+    let numberOfColumns=5
+    let skipPerColumn=numberOfCommands/numberOfColumns+1
+    #echo -e "numberOfCommands ${numberOfCommands} numberOfColumns ${numberOfColumns}, skipPerColumn ${skipPerColumn}"
+
+    let offset=0
+    let row=0
+    for (( i = 0; i <= numberOfCommands; i += numberOfColumns )) do
+        for ((column=0; column < numberOfColumns;column += 1)) do
+            #echo "i=${i},column ${column}"
+            let goal=$skipPerColumn*$column+$row
+            cnt=0;
+            for command in $usefulCommandList 
+            do
+
+                #echo -e "i=${i},cnt=${cnt},row=${row},column=${column}, goal=${goal}, command=${command}"
+                if [ $cnt -eq $goal ] 
+                then
+                    #echo -e "*********************** ${command}"
+                    item=`printf "%-28s" $command`
+                    line="${line}${item}\t"
+                    break
+                fi
+                let cnt=cnt+1;
+
+            done
+        done
+        echo -e "${line}"
+        line=""
+        let row=row+1
+
+    done
+    echo -e "${line}"
+
+}
+
+
+function startNeo4J () {
+    # From https://neo4j.com/developer/docker-run-neo4j/
+    echo -e "Default Password is neo4j/neo4j\nhttp:\\localhost:7474\""
+    docker run \
+    --name testneo4j \
+    -p7474:7474 -p7687:7687 \
+    -d \
+    -v $HOME/neo4j/data:/data \
+    -v $HOME/neo4j/logs:/logs \
+    -v $HOME/neo4j/import:/var/lib/neo4j/import \
+    -v $HOME/neo4j/plugins:/plugins \
+    --env NEO4J_AUTH=neo4j/test \
+    neo4j:latest
+}
+
+function BellagioCodeAnalysis () {
+    objects=( );objects[0]='superbill_id';objects[1]='patient_id';objects[2]='vital_id';objects[3]='problem_id';objects[4]='encounter_id';objects[5]='rx_id';objects[6]='note_id';for o in ${objects[@]}; do echo ${o}; rg "${o}" -g '*.rb' | grep -n -v "# " | sed -E 's/(.*):.*\/(.*\.rb):(.*)/\2,\1,\3/g' >> bellagio-${o}  ; done;
+    objects=( );objects[0]='superbill_id';objects[1]='patient_id';objects[2]='vital_id';objects[3]='problem_id';objects[4]='encounter_id';objects[5]='rx_id';objects[6]='note_id';for o in ${objects[@]}; do echo ${o}; rg "${o}" -g '*.haml' | grep -n -v "# " | sed -E 's/(.*):.*\/(.*\.rb):(.*)/\2,\1,\3/g' >> bellagio-${o}  ; done;
+    objects=( );objects[0]='superbill_id';objects[1]='patient_id';objects[2]='vital_id';objects[3]='problem_id';objects[4]='encounter_id';objects[5]='rx_id';objects[6]='note_id';for o in ${objects[@]}; do echo ${o}; rg "${o}" -g '*.js' | grep -n -v "# " | sed -E 's/(.*):.*\/(.*\.rb):(.*)/\2,\1,\3/g' >> bellagio-${o}  ; done;
+    objects=( );objects[0]='superbill_id';objects[1]='patient_id';objects[2]='vital_id';objects[3]='problem_id';objects[4]='encounter_id';objects[5]='rx_id';objects[6]='note_id';for o in ${objects[@]}; do echo ${o}; cat bellagio-"${o}" | wc -l ; done;
+}
+
+function ProcessQpppsFromLogs () {
+    if [ -n $1 ] 
+    then
+        filename=$1
+    else 
+        echo -n "Input Log File Name to Process:"
+        read filename
+    fi    
+    backupFileName='/tmp/qppps-data.tmp'
+    qpppsFileName='/tmp/qppps.csv'
+    cp $filename $backupFileName
+
+    cat $backupFileName | grep SummarizedQppsRecord | sed 's/SummarizedQppsRecord(//g' | sed 's/)//g'  > $qpppsFileName
+
+    echo "year;" # 1
+    awk -F ',' '{print $1}' $qpppsFileName | sort | uniq -c
+    #echo "customerID"  # 2
+    #awk -F ',' '{print $2}' $qpppsFileName | sort | uniq -c
+ #   echo "customerName"  # 3
+ #   awk -F ',' '{print $3}' $qpppsFileName | sort | uniq -c
+ #   echo "providerName"  # 4
+ #   awk -F ',' '{print $4}' $qpppsFileName | sort | uniq -c
+#    echo "providerNPI"  # 5
+#    awk -F ',' '{print $5}' $qpppsFileName | sort | uniq -c
+    echo "validNPI"  # 6
+    awk -F ',' '{print $6}' $qpppsFileName | sort | uniq -c
+    echo "providerSpecialty"  # 7
+    awk -F ',' '{print $7}' $qpppsFileName | sort | uniq -c
+#    echo "organizationName"  # 8
+#    awk -F ',' '{print $8}' $qpppsFileName | sort | uniq -c
+    echo "individualOptInReporting"  # 9
+    awk -F ',' '{print $9}' $qpppsFileName | sort | uniq -c
+    echo "groupOptInReporting"  #10
+    awk -F ',' '{print $10}' $qpppsFileName | sort | uniq -c
+    echo "individualHardship"  #11
+    awk -F ',' '{print $11}' $qpppsFileName | sort | uniq -c
+    echo "groupHardship"  #12
+    awk -F ',' '{print $12}' $qpppsFileName | sort | uniq -c
+    echo "providerReprtingasAPM"  #13
+    awk -F ',' '{print $13}' $qpppsFileName | sort | uniq -c
+    echo "providerRanQMYearlyReport"  #14
+    awk -F ',' '{print $14}' $qpppsFileName | sort | uniq -c
+    echo "errorMsg"  #15
+    awk -F ',' '{print $15}' $qpppsFileName | sort | uniq -c
+    echo "isIndividualEligible"  #16
+    awk -F ',' '{print $16}' $qpppsFileName | sort | uniq -c
+    echo "isIndividualMipsAmpsEligible"  #17
+    awk -F ',' '{print $17}' $qpppsFileName | sort | uniq -c
+    echo "isGroupEligible"  #18
+    awk -F ',' '{print $18}' $qpppsFileName | sort | uniq -c
+    echo "isGroupMipsAmpsEligible" / #19
+    awk -F ',' '{print $19}' $qpppsFileName | sort | uniq -c
+
+}
+
+# interops-service SummarizedQpppsRecord unique value counter
+
+function ProcessQpppsFromFile () {
+    if [ -n $1 ] 
+    then
+        qpppsFileName=$1
+    else 
+        echo -n "Input Log File Name to Process:"
+        read qpppsFileName
+    fi    
+
+    echo "year;" # 2
+    awk -F ',' '{print $2}' $qpppsFileName | sort | uniq -c
+    #echo "customerID"  # 2
+    #awk -F ',' '{print $2}' $qpppsFileName | sort | uniq -c
+ #   echo "customerName"  # 3
+ #   awk -F ',' '{print $3}' $qpppsFileName | sort | uniq -c
+ #   echo "providerName"  # 4
+ #   awk -F ',' '{print $4}' $qpppsFileName | sort | uniq -c
+#    echo "providerNPI"  # 5
+#    awk -F ',' '{print $5}' $qpppsFileName | sort | uniq -c
+    echo "validNPI"  # 6
+    awk -F ',' '{print $6}' $qpppsFileName | sort | uniq -c
+    echo "providerSpecialty"  # 7
+    awk -F ',' '{print $7}' $qpppsFileName | sort | uniq -c
+#    echo "organizationName"  # 8
+#    awk -F ',' '{print $8}' $qpppsFileName | sort | uniq -c
+    echo "individualOptInReporting"  # 9
+    awk -F ',' '{print $9}' $qpppsFileName | sort | uniq -c
+    echo "groupOptInReporting"  #10
+    awk -F ',' '{print $10}' $qpppsFileName | sort | uniq -c
+    echo "individualHardship"  #11
+    awk -F ',' '{print $11}' $qpppsFileName | sort | uniq -c
+    echo "groupHardship"  #12
+    awk -F ',' '{print $12}' $qpppsFileName | sort | uniq -c
+    echo "providerReprtingasAPM"  #13
+    awk -F ',' '{print $13}' $qpppsFileName | sort | uniq -c
+    echo "providerRanQMYearlyReport"  #14
+    awk -F ',' '{print $14}' $qpppsFileName | sort | uniq -c
+    echo "errorMsg"  #15
+    awk -F ',' '{print $15}' $qpppsFileName | sort | uniq -c
+    echo "isIndividualEligible"  #16
+    awk -F ',' '{print $16}' $qpppsFileName | sort | uniq -c
+    echo "isIndividualMipsAmpsEligible"  #17
+    awk -F ',' '{print $17}' $qpppsFileName | sort | uniq -c
+    echo "isGroupEligible"  #18
+    awk -F ',' '{print $18}' $qpppsFileName | sort | uniq -c
+    echo "isGroupMipsAmpsEligible"  #19
+    awk -F ',' '{print $19}' $qpppsFileName | sort | uniq -c
+    echo "patient scores" #20
+    awk -F ',' '{print $20}' $qpppsFileName | sort | uniq -c
+    echo "payment scores"  #21
+    awk -F ',' '{print $21}' $qpppsFileName | sort | uniq -c
+
+}
+
+function codeAnalysis() {
+    currentDir="${PWD}"
+    repoName="${PWD##*/}"
+    echo $currentDir
+    echo $repoName
+    repoBaseDir="/Users/bill.nortman/dev2/code-maat/repo/"
+    repoDir="${repoBaseDir}${repoName}"
+    mkdir $repoDir
+    repoLog="${repoDir}/${repoName}.log"
+    git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat > $repoLog
+}
+
+function scanPomDependencies () {
+    cat pom.xml | grep "<dependency>" -a2   | grep groupId -a01 | sed 's/.*dency>//g'  | tr -d '\n' | sed 's/--/\n/g'  > dep.tmp
+    cat dep.tmp | sed -e 's/(.*groupId>)(?<grp>.*)(<.*)(<)(artifactId>)(?<art>.*)<(.*>)/$grp.$art\n/g' > dep2.tmp
+    sed -e 's/.*<groupId>//' dep2.tmp  | sed -e 's/<\/groupId>.*<artifactId>/./g' | sed -e 's:\<\/artifactId>::g'| sort > dep3.tmp
+    cat dep3.tmp
+    cat dep3.tmp | pbcopy
+
+
+}
+
+function scanAllPomDependencies () {
+    builtin cd /Users/bill.nortman/dev3
+    echo "" > pomdependencies.txt #Clean file out
+    for dir in /Users/bill.nortman/dev3/*
+    do 
+        echo "DIR ${dir}"
+        if [[ -d "$dir" ]]; then
+            echo "DIR ${dir}"
+            builtin cd "$dir"
+            pwd
+            if [ -f "pom.xml" ]
+            then
+                cat pom.xml | grep "<dependency>" -a2   | grep groupId -a01 | sed 's/.*dency>//g'  | tr -d '\n' | sed 's/--/\n/g'  > dep.tmp
+                cat dep.tmp | sed -e 's/(.*groupId>)(?<grp>.*)(<.*)(<)(artifactId>)(?<art>.*)<(.*>)/$grp.$art\n/g' > dep2.tmp
+                sed -e 's/.*<groupId>//' dep2.tmp  | sed -e 's/<\/groupId>.*<artifactId>/./g' | sed -e 's:\<\/artifactId>::g' > dep3.tmp
+                cat dep3.tmp >> /Users/bill.nortman/pomdependencies.txt # Append the dependencies
+                cat dep3.tmp
+            else
+                echo "Not a MVN project ${dir}"
+            fi
+            builtin cd ..
+            pwd
+        else
+            echo "Skipping ${dir}"
+        fi
+    done
+    cat /Users/bill.nortman/pomdependencies.txt | sort | uniq  > /Users/bill.nortman/pomdependencies.tmp
+    # echo -e "************\n${dependencies}\n\n"
+    echo -e "" > /Users/bill.nortman/pomdependencieswSearch.txt # Clear file
+    fulllist=`cat /Users/bill.nortman/pomdependencies.tmp`
+    echo -e "${fulllist}"
+    for dep in $fulllist
+    do  
+        echo -e "search for ${dep}"
+        googler -n 1 --np -C ${dep} | sed 's:\n: :g' | sed 's:,: :g' | sed 's:\r: :g' | tr '\n' ' '  > tmp.txt
+        search2=`cat tmp.txt`
+        echo -e "\n********\n${dep},${search2}\n\n" 
+        echo -e "${dep}, ${search2}" >> /Users/bill.nortman/pomdependencieswSearch.txt
+        sleep 5
+    done
+    cat /Users/bill.nortman/pomdependencieswSearch.txt
+    cat /Users/bill.nortman/pomdependencieswSearch.txt | pbcopy 
+    echo "List is in the clipboard"
+}
+
+
+function scanAllNuSpec() {
+    builtin cd /Users/bill.nortman/dev3
+    echo "" > nuspec-references.txt #Clean file out
+    echo "Please wait find . -name '*.nuspec'"
+    files=`find . -name '*.nuspec'`
+    for file in $files
+    do 
+        echo -e "${file}\n-----------------------------------------------------------------------------------"
+        cat ${file} | grep 'reference file' > dep.tmp
+        cat dep.tmp | sed 's/.*="//g' | sed 's/".*//g' >> nuspec-references.txt
+    done
+    cat nuspec-references.txt | sort | uniq -c | sort -n 
+    cat nuspec-references.txt | sort | uniq | pbcopy
+    echo "List is in the clipboard"
+}
+
+
+function scanAllPackages() {
+    builtin cd /Users/bill.nortman/dev3
+    echo "" > package-references.txt #Clean file out
+    echo "Please wait running: find . -name 'package.json'"
+    files=`find . -name 'package.json' | grep -v "node_modules"`
+    for file in $files
+    do 
+        echo -e "${file}\n-----------------------------------------------------------------------------------"
+        cat ${file} | jq '.dependencies' | grep "\"" | sed 's/:.*//g' | sed 's/\"//g'  >> package-references.txt
+    done
+    cat package-references.txt | sort | uniq -c | sort -n 
+    cat package-references.txt | sort | uniq | pbcopy
+    echo -e "List is in the clipboard. "
+}
+
+function end() {
+    echo "this is the end"
+}
+
+function gitHowling() {
+    git config --global  user.name "howlingsails"
+    git config --global  user.email "cap10bill@howlingsails.com"
+    echo -e "Host *\n  AddKeysToAgent yes\n  UseKeychain yes\n  IdentityFile ~/.ssh/id_ed25519" > ~/.ssh/config
+}
+
+function gitBnortman() {
+    git config --global  user.name "bnortman"
+    git config --global  user.email "bnortman@yahoo.com"
+    echo -e "Host *\n  AddKeysToAgent yes\n  UseKeychain yes\n  IdentityFile ~/.ssh/id_bnortman" > ~/.ssh/config
+}
+
+function gitBillNortmanKareo() {
+    git config --global  user.name "bill.nortman"
+    git config --global  user.email "bill.nortman@kareo.com"
+    echo -e "Host *\n  AddKeysToAgent yes\n  UseKeychain yes\n  IdentityFile ~/.ssh/id_rsa" > ~/.ssh/config
+
+}
