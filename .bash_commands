@@ -35,26 +35,11 @@ alias kc='kubectl create -n "$namespace"'
 
 alias sshkey='cat ~/.ssh/id_rsa.pub'
 alias commands=`cat ~/.bash_commands | grep "alias\|function"| sed "s/=/ /" | awk '{print $2}' | sed  "s/=\"cat//" | sed "s/='clear;//" | sed "s/='//" | sed "s/=\"//" | sed "s/;//" | sed "s/()//" | sort | xargs -s 140`
-alias fixclip="killall pboard"
 alias epoch="date +%s%N | cut -b1-13"
 
-alias kafkaManagerDev='docker run -it  -p 9001:9000 -e ZK_HOSTS="sna-dvx-zk-01.kareo.ent:2181,sna-dvx-zk-02.kareo.ent:2181,sna-dvx-zk-03.kareo.ent:2181" hlebalbau/kafka-manager:stable -Dpidfile.path=/dev/null'
-alias kafkaManagerTest='docker run -it -p 9002:9000 -e ZK_HOSTS="sna-tsx-zk-01.kareo.ent:2181,sna-tsx-zk-02.kareo.ent:2181,sna-tsx-zk-03.kareo.ent:2181"  hlebalbau/kafka-manager:stable  -Dpidfile.path=/dev/null'
-alias kakfaManagerStage='docker run -it -p 9003:9000 -e ZK_HOSTS="sna-sgx-zk-04.kareoprod.ent:2181,sna-sgx-zk-05.kareoprod.ent:2181,sna-sgx-zk-06.kareoprod.ent:2181"  hlebalbau/kafka-manager:stable  -Dpidfile.path=/dev/null'
-alias kafkaManagerProd='docker run -it -p 9003:9000 -e ZK_HOSTS="las-pdx-zk-04.kareoprod.ent:2181,las-pdx-zk-05.kareoprod.ent:2181,las-pdx-zk-06.kareoprod.ent:2181,las-pdx-zk-07.kareoprod.ent:2181,las-pdx-zk-08.kareoprod.ent:2181"      hlebalbau/kafka-manager:stable      -Dpidfile.path=/dev/null'
-
-# TODO Why can't I get this to work. 
-alias kafdropDev2='docker run -it -p 9011:9000 -e KAFKA_BROKERCONNECT="sna-dvx-kafka-01.kareo.ent:9200,sna-dvx-kafka-02.kareo.ent:9200,sna-dvx-kafka-03.kareo.ent:9200"  obsidiandynamics/kafdrop'
 
 
 
-# A little magic
-shouldI=$(( ( RANDOM % 2 )  + 1 ))
-if [ "${shouldId}" = "1" ] 
-then
-    echo -e ""${BCyan}"\"cra asks... what is the next app? "
-    sleep 5
-fi
 
 # Create React App with React-Boilerplate-CRA-Typescript Template 
 function cra() {

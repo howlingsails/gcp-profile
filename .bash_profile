@@ -2,10 +2,7 @@
 ####################################################
 #                REMEMBER TO BACKUP                #
 ####################################################
-# Hi Chad
 #
-export SDKMAN_DIR="/Users/wnortman/.sdkman"
-PATH="/usr/bin:$PATH"
 
 source ~/.bash_aliases
 echo -e "Loaded Aliases"
@@ -26,7 +23,7 @@ THEIP=$(ifconfig  | grep 'inet ' | head -n2 | grep -v '127.0.0.1' | cut -d: -f2 
 usefulCommands=`getUsefulCommands`
 
 
-
+cat ~/.bash_tebra
 
 ## Clear and Prep for drawing cap10bill random logo and key information
 #clear
@@ -62,7 +59,7 @@ function src() {
     chmod 640 ~/.bash*
     echo -e "Copying From ~/dev2/_automation/gcp-profile"
     sleep 1
-    for f in /Users/bill.nortman/dev2/_automation/bash-mac/.bash*; do  if [ -f $f ] ; then cp -f "$f" /Users/bill.nortman/; fi; done
+    for f in /Users/bill.nortman/dev2/_automation/gcp-profile/.bash*; do  if [ -f $f ] ; then cp -f "$f" /Users/bill.nortman/; fi; done
     echo "Copy Profiles Complete"
     # Disable Write
     chmod 440 ~/.bash*
@@ -75,7 +72,6 @@ function src() {
 }
 
 alias g='getUsefulCommands'
-source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
 
 
 
